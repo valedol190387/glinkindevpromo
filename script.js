@@ -100,21 +100,28 @@ class Carousel {
 
     handleTouchStart(e) {
         this.startX = e.touches[0].clientX;
-        this.isDragging = true;
+        this.currentX = this.startX;
+        this.isDragging = false; // Start as false, set to true only when actually moving
     }
 
     handleTouchMove(e) {
-        if (!this.isDragging) return;
-        this.currentX = e.touches[0].clientX;
+        const moveX = e.touches[0].clientX;
+        const diff = Math.abs(moveX - this.startX);
+
+        // Only consider it dragging if moved more than 5px
+        if (diff > 5) {
+            this.isDragging = true;
+        }
+
+        this.currentX = moveX;
     }
 
     handleTouchEnd() {
-        if (!this.isDragging) return;
-
         const diff = this.startX - this.currentX;
         const threshold = 80; // Increased threshold to prevent accidental swipes
 
-        if (Math.abs(diff) > threshold) {
+        // Only navigate if it was actually a swipe (isDragging is true and moved enough)
+        if (this.isDragging && Math.abs(diff) > threshold) {
             if (diff > 0) {
                 // Swipe left - next slide
                 this.next();
