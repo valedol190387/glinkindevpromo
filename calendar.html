@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь - ЖКТ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="calendar.css">
+</head>
+<body>
+    <!-- Градиентный фон -->
+    <div class="bg-gradient"></div>
+
+    <!-- Хедер -->
+    <header class="header glass-effect">
+        <button class="back-button" onclick="window.location.href='index.html'">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <h1 class="page-title">Календарь</h1>
+        <div class="header-spacer"></div>
+    </header>
+
+    <!-- Главный контент -->
+    <main class="main-content">
+        <!-- Переключатель месяцев -->
+        <div class="month-selector glass-effect">
+            <button class="month-nav" id="prevMonth">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <div class="month-display">
+                <span class="current-month" id="currentMonth">Октябрь</span>
+            </div>
+            <button class="month-nav" id="nextMonth">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Календарная сетка -->
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Дни недели -->
+            <div class="weekday">Mon</div>
+            <div class="weekday">Tue</div>
+            <div class="weekday">Wed</div>
+            <div class="weekday">Thu</div>
+            <div class="weekday">Fri</div>
+            <div class="weekday">Sat</div>
+            <div class="weekday">Sun</div>
+        </div>
+
+        <!-- Информационный блок -->
+        <div class="info-section glass-effect">
+            <div id="scheduleView">
+                <h2 class="info-title">📌 График всех встреч</h2>
+
+                <div class="schedule-list">
+                    <div class="schedule-item" data-index="0">
+                        <span class="schedule-number">1</span>
+                        <div class="schedule-info">
+                            <p class="schedule-name">Селезёнка</p>
+                            <p class="schedule-date">4 октября, 12:00 (МСК)</p>
+                        </div>
+                    </div>
+                    <div class="schedule-item" data-index="1">
+                        <span class="schedule-number">2</span>
+                        <div class="schedule-info">
+                            <p class="schedule-name">Желудок</p>
+                            <p class="schedule-date">11 октября, 12:00 (МСК)</p>
+                        </div>
+                    </div>
+                    <div class="schedule-item" data-index="2">
+                        <span class="schedule-number">3</span>
+                        <div class="schedule-info">
+                            <p class="schedule-name">Печень</p>
+                            <p class="schedule-date">18 октября, 12:00 (МСК)</p>
+                        </div>
+                    </div>
+                    <div class="schedule-item" data-index="3">
+                        <span class="schedule-number">4</span>
+                        <div class="schedule-info">
+                            <p class="schedule-name">Желчный пузырь</p>
+                            <p class="schedule-date">25 октября, 12:00 (МСК)</p>
+                        </div>
+                    </div>
+                    <div class="schedule-item" data-index="4">
+                        <span class="schedule-number">5</span>
+                        <div class="schedule-info">
+                            <p class="schedule-name">Поджелудочная</p>
+                            <p class="schedule-date">1 ноября, 12:00 (МСК)</p>
+                        </div>
+                    </div>
+                    <div class="schedule-item" data-index="5">
+                        <span class="schedule-number">6</span>
+                        <div class="schedule-info">
+                            <p class="schedule-name">Кишечник</p>
+                            <p class="schedule-date">8 ноября, 12:00 (МСК)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-block">
+                    <p class="info-subtitle">📎 Всё, что нужно знать</p>
+                    <p class="info-text">За 1 час до начала мастер-классов мы пришлем вам прямую ссылку для входа на Zoom-встречу с Ксенией Глинкиной.</p>
+                    <p class="info-text">На следующий день после прямого эфира будет выложен и оформлен доступ к материалам прошедшего мастер-класса.</p>
+                    <p class="info-text">Записи встреч и презентации останутся у вас навсегда 🔐</p>
+                </div>
+            </div>
+
+            <div id="eventView" style="display: none;">
+                <button class="back-to-schedule" id="backToSchedule">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Назад к расписанию
+                </button>
+
+                <div class="event-details">
+                    <h2 class="event-title" id="selectedEventTitle"></h2>
+                    <p class="event-subtitle" id="selectedEventSubtitle"></p>
+                    <p class="event-date" id="selectedEventDate"></p>
+                </div>
+
+                <div class="info-block">
+                    <p class="info-subtitle">📎 Всё, что нужно знать</p>
+                    <p class="info-text">За 1 час до начала мастер-класса мы пришлем вам прямую ссылку для входа на Zoom-встречу с Ксенией Глинкиной.</p>
+                    <p class="info-text">На следующий день после прямого эфира будет выложен и оформлен доступ к материалам прошедшего мастер-класса.</p>
+                    <p class="info-text">Записи встреч и презентации останутся у вас навсегда 🔐</p>
+                </div>
+
+                <button class="details-button" id="openModuleModal">Подробнее о модуле</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно модуля -->
+    <div id="moduleModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content glass-effect">
+            <button class="modal-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+
+            <div class="modal-image-container">
+                <img id="modalImage" src="" alt="" class="modal-image">
+            </div>
+
+            <div class="modal-info">
+                <h2 id="modalTitle" class="modal-title"></h2>
+                <p id="modalSubtitle" class="modal-subtitle"></p>
+                <p id="modalDescription" class="modal-description"></p>
+
+                <div class="modal-price-section">
+                    <span class="modal-price" id="modalPrice"></span>
+                    <button class="modal-buy-button">Купить модуль</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="calendar.js"></script>
+</body>
+</html>

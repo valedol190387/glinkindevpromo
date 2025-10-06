@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - ЖКТ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <!-- Градиентный фон -->
+    <div class="bg-gradient"></div>
+
+    <!-- Хедер -->
+    <header class="header glass-effect">
+        <button class="back-button" onclick="window.location.href='index.html'">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <h1 class="page-title">Профиль</h1>
+        <div class="header-spacer"></div>
+    </header>
+
+    <!-- Главный контент -->
+    <main class="main-content">
+        <!-- Профиль пользователя -->
+        <div class="profile-card glass-effect">
+            <img src="images/ava.jpg" alt="Аватар" class="profile-avatar">
+            <h2 class="profile-name">Пользователь</h2>
+            <p class="profile-telegram">Telegram ID: @user123</p>
+        </div>
+
+        <!-- Нужна помощь -->
+        <div class="section-card glass-effect" id="helpCard">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <span class="section-title">Нужна помощь</span>
+                <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+
+            <div class="section-content" id="helpContent" style="display: none;">
+                <textarea class="help-textarea" placeholder="Опишите вашу проблему или вопрос..."></textarea>
+                <button class="submit-button">Отправить</button>
+            </div>
+        </div>
+
+        <!-- История оплат -->
+        <div class="section-card glass-effect" id="paymentsCard">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                </div>
+                <span class="section-title">История оплат</span>
+                <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+
+            <div class="section-content" id="paymentsContent" style="display: none;">
+                <div class="payment-list">
+                    <div class="payment-item">
+                        <div class="payment-info">
+                            <p class="payment-title">Все 6 модулей</p>
+                            <p class="payment-date">4 октября 2024</p>
+                        </div>
+                        <div class="payment-amount">89 900 ₽</div>
+                    </div>
+                    <div class="payment-item">
+                        <div class="payment-info">
+                            <p class="payment-title">Модуль: Селезёнка</p>
+                            <p class="payment-date">1 октября 2024</p>
+                        </div>
+                        <div class="payment-amount">16 900 ₽</div>
+                    </div>
+                    <div class="payment-item">
+                        <div class="payment-info">
+                            <p class="payment-title">Модуль: Печень</p>
+                            <p class="payment-date">15 сентября 2024</p>
+                        </div>
+                        <div class="payment-amount">16 900 ₽</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Системная информация -->
+        <div class="section-card glass-effect" id="systemCard">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m6-9h6M7 12H1m17.4-6.4l-4.25 4.25m-7.1 7.1L2.6 21.4m18.8 0l-4.25-4.25m-7.1-7.1L5.6 5.6"></path>
+                    </svg>
+                </div>
+                <span class="section-title">Системная информация</span>
+                <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+
+            <div class="section-content" id="systemContent" style="display: none;">
+                <div class="system-info">
+                    <div class="info-row">
+                        <span class="info-label">Браузер:</span>
+                        <span class="info-value" id="browserInfo">Chrome 120.0.0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">ОС:</span>
+                        <span class="info-value" id="osInfo">macOS 14.1</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Устройство:</span>
+                        <span class="info-value" id="deviceInfo">Desktop</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Разрешение:</span>
+                        <span class="info-value" id="resolutionInfo">1920x1080</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">User Agent:</span>
+                        <span class="info-value" id="userAgentInfo">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...</span>
+                    </div>
+                </div>
+                <button class="copy-button" id="copySystemInfo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Скопировать данные
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="profile.js"></script>
+</body>
+</html>
