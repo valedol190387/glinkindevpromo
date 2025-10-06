@@ -376,10 +376,11 @@ body {
 
 .old-price {
     font-family: var(--font-display);
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 600;
     color: var(--accent-coral);
     text-decoration: line-through;
+    white-space: nowrap;
 }
 
 .price-new-line {
@@ -389,9 +390,10 @@ body {
 
 .new-price {
     font-family: var(--font-display);
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: #2ECC71;
+    white-space: nowrap;
 }
 
 .package-info-button {
@@ -644,9 +646,10 @@ body {
 }
 
 .modal-price {
-    font-size: 32px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--accent-coral);
+    white-space: nowrap;
 }
 
 .modal-buy-button {
@@ -703,9 +706,10 @@ body {
 
 .package-new-price {
     font-family: var(--font-display);
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: #2ECC71;
+    white-space: nowrap;
 }
 
 .package-price-row.save {
