@@ -214,8 +214,45 @@ function updateActiveTimecode(currentTime) {
     }
 }
 
+// Telegram WebApp fullscreen initialization
+function initTelegramFullscreen() {
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+
+        // Expand the app first
+        tg.expand();
+        console.log('Telegram WebApp expanded');
+
+        // Request fullscreen mode if available
+        if (typeof tg.requestFullscreen === 'function') {
+            try {
+                tg.requestFullscreen();
+                console.log('Telegram WebApp fullscreen requested');
+            } catch (error) {
+                console.error('Failed to request Telegram fullscreen:', error);
+            }
+        } else {
+            console.log('Telegram requestFullscreen not available');
+        }
+
+        // Listen for fullscreen change events
+        tg.onEvent('fullscreenChanged', () => {
+            console.log('Fullscreen state changed:', tg.isFullscreen);
+        });
+
+        tg.onEvent('fullscreenFailed', (error) => {
+            console.error('Fullscreen failed:', error);
+        });
+    } else {
+        console.log('Telegram WebApp not available (not running in Telegram)');
+    }
+}
+
 // Initialize player when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Telegram fullscreen mode
+    initTelegramFullscreen();
+
     // Only init if we're on a page with video
     const videoContainer = document.getElementById('kinescope-player');
     if (videoContainer) {
