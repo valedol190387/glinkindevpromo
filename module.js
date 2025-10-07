@@ -97,17 +97,29 @@ async function initKinescopePlayer() {
     try {
         const Kinescope = await loadKinescopeAPI();
 
-        // Get the iframe element
-        const iframe = document.querySelector('.video-container iframe');
-        if (!iframe) return;
+        // Get the iframe element by ID
+        const iframe = document.getElementById('kinescope-player');
+        if (!iframe) {
+            console.error('Kinescope iframe not found');
+            return;
+        }
+
+        // Wait a bit for iframe to be ready
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Create player instance from existing iframe
-        kinescopePlayer = await Kinescope.IframePlayer.create(iframe);
+        kinescopePlayer = await Kinescope.IframePlayer.create('kinescope-player');
+
+        console.log('Kinescope player initialized successfully');
 
         // Listen to time updates
         kinescopePlayer.on('timeupdate', (event) => {
             currentVideoTime = event.data.currentTime || 0;
             updateActiveTimecode(currentVideoTime);
+        });
+
+        kinescopePlayer.on('ready', () => {
+            console.log('Player is ready');
         });
 
         // Add click handlers to timecode items
@@ -117,9 +129,15 @@ async function initKinescopePlayer() {
                 const timecode = item.getAttribute('data-time');
                 const seconds = timecodeToSeconds(timecode);
 
+                console.log(`Seeking to ${timecode} (${seconds} seconds)`);
+
                 if (kinescopePlayer) {
-                    kinescopePlayer.seekTo(seconds);
-                    kinescopePlayer.play();
+                    kinescopePlayer.seekTo(seconds).then(() => {
+                        console.log('Seek successful');
+                        kinescopePlayer.play();
+                    }).catch(err => {
+                        console.error('Seek failed:', err);
+                    });
                 }
             });
         });
@@ -155,9 +173,12 @@ function updateActiveTimecode(currentTime) {
 // Initialize player when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Only init if we're on a page with video
-    const videoContainer = document.querySelector('.video-container iframe');
+    const videoContainer = document.getElementById('kinescope-player');
     if (videoContainer) {
+        console.log('Found video container, initializing player...');
         initKinescopePlayer();
+    } else {
+        console.log('No video container found on this page');
     }
 });
 
