@@ -343,6 +343,27 @@ window.addEventListener('message', (event) => {
     }
 });
 
+// Fallback fullscreen function for Android
+function triggerFullscreen() {
+    const iframe = document.getElementById('kinescope-player');
+    if (!iframe) return;
+
+    console.log('Triggering fullscreen manually...');
+
+    if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+    } else if (iframe.webkitRequestFullscreen) {
+        iframe.webkitRequestFullscreen();
+    } else if (iframe.mozRequestFullScreen) {
+        iframe.mozRequestFullScreen();
+    } else if (iframe.msRequestFullscreen) {
+        iframe.msRequestFullscreen();
+    }
+}
+
+// Make it available globally for debugging
+window.triggerFullscreen = triggerFullscreen;
+
 // Initialize player when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Only init if we're on a page with video
@@ -350,6 +371,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (videoContainer) {
         console.log('DOM ready, initializing Kinescope player...');
         initKinescopePlayer();
+
+        // For Android - add double-tap on video container to go fullscreen
+        const container = document.querySelector('.video-container');
+        let lastTap = 0;
+
+        if (container && /Android/i.test(navigator.userAgent)) {
+            console.log('Android detected - adding double-tap fullscreen');
+            container.addEventListener('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+
+                if (tapLength < 500 && tapLength > 0) {
+                    console.log('Double tap detected, triggering fullscreen');
+                    triggerFullscreen();
+                    e.preventDefault();
+                }
+                lastTap = currentTime;
+            });
+        }
     } else {
         console.log('No video container found on this page');
     }
