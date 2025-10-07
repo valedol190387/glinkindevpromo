@@ -218,6 +218,22 @@ body {
     transform: translateX(4px);
 }
 
+.timecode-item.active {
+    background: rgba(255, 138, 115, 0.15);
+    border-left: 3px solid var(--accent-coral);
+    padding-left: 13px;
+}
+
+.timecode-item.active .timecode-time {
+    color: var(--accent-coral);
+    font-weight: 800;
+}
+
+.timecode-item.active .timecode-text {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
 .timecode-time {
     font-family: 'Courier New', monospace;
     font-size: 14px;
