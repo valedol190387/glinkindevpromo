@@ -220,6 +220,156 @@ function updateActiveTimecode(currentTime) {
     }
 }
 
+// Kinescope Fullscreen handler via postMessage (like colleague's code)
+window.addEventListener('message', (event) => {
+    if (event.data.type && event.data.type === 'KINESCOPE_PLAYER_FULLSCREEN_CHANGE') {
+        const frames = document.getElementsByTagName('iframe');
+
+        for (let i = 0; i < frames.length; i++) {
+            if (frames[i].contentWindow === event.source) {
+                if (event.data.value) {
+                    // Entering fullscreen
+                    console.log('Kinescope fullscreen: ENTERING');
+                    window.oldFrameStyles = frames[i].style.cssText;
+
+                    frames[i].style.cssText = `
+                        background: #000;
+                        border: none;
+                        position: fixed;
+                        z-index: 9999;
+                        width: 100%;
+                        height: 100%;
+                        bottom: 0;
+                        right: 0;
+                        top: 0;
+                        left: 0;
+                    `;
+
+                    // Lock orientation to landscape for video
+                    try {
+                        console.log('Attempting to lock landscape orientation...');
+
+                        // 1. Telegram API for orientation lock
+                        if (window.Telegram?.WebApp) {
+                            if (window.Telegram.WebApp.toggleOrientationLock) {
+                                console.log('Using Telegram toggleOrientationLock');
+                                window.Telegram.WebApp.toggleOrientationLock(true);
+                            }
+
+                            // Direct postEvent call for older versions
+                            try {
+                                if (window.TelegramWebviewProxy?.postEvent) {
+                                    console.log('Using TelegramWebviewProxy.postEvent for landscape');
+                                    window.TelegramWebviewProxy.postEvent('web_app_toggle_orientation_lock', JSON.stringify({locked: true}));
+                                } else if (window.parent) {
+                                    console.log('Using window.parent.postMessage for landscape');
+                                    const data = JSON.stringify({
+                                        eventType: 'web_app_toggle_orientation_lock',
+                                        eventData: { locked: true }
+                                    });
+                                    window.parent.postMessage(data, 'https://web.telegram.org');
+                                }
+                            } catch (e) {
+                                console.log('Telegram API fallback failed:', e);
+                            }
+                        }
+
+                        // 2. Standard Screen Orientation API
+                        if (screen.orientation && screen.orientation.lock) {
+                            console.log('Using screen.orientation.lock');
+                            screen.orientation.lock('landscape-primary').catch(err => {
+                                console.log('Primary landscape failed, trying any landscape');
+                                screen.orientation.lock('landscape').catch(err2 => {
+                                    console.log('All orientation locks failed:', err2);
+                                });
+                            });
+                        }
+
+                        // 3. CSS rotation for portrait mode devices
+                        if (window.innerHeight > window.innerWidth) {
+                            console.log('Applying CSS rotation for portrait mode');
+                            frames[i].style.cssText += `
+                                transform: rotate(90deg) !important;
+                                transform-origin: center center !important;
+                                width: 100vh !important;
+                                height: 100vw !important;
+                                position: fixed !important;
+                                top: 50% !important;
+                                left: 50% !important;
+                                margin-left: -50vh !important;
+                                margin-top: -50vw !important;
+                            `;
+                        }
+
+                        // 4. Android-specific fixes
+                        if (navigator.userAgent.includes('Android')) {
+                            console.log('Android detected, applying additional styles');
+                            document.body.style.overflow = 'hidden';
+                            document.documentElement.style.overflow = 'hidden';
+                        }
+
+                    } catch (error) {
+                        console.log('Failed to lock orientation:', error);
+                    }
+
+                } else {
+                    // Exiting fullscreen
+                    console.log('Kinescope fullscreen: EXITING');
+
+                    if (window.oldFrameStyles) {
+                        frames[i].style.cssText = window.oldFrameStyles;
+                    } else {
+                        frames[i].style.cssText = '';
+                    }
+
+                    // Unlock orientation
+                    try {
+                        console.log('Unlocking orientation...');
+
+                        // Unlock via Telegram API
+                        if (window.Telegram?.WebApp) {
+                            if (window.Telegram.WebApp.toggleOrientationLock) {
+                                console.log('Unlocking via Telegram API');
+                                window.Telegram.WebApp.toggleOrientationLock(false);
+                            }
+
+                            try {
+                                if (window.TelegramWebviewProxy?.postEvent) {
+                                    window.TelegramWebviewProxy.postEvent('web_app_toggle_orientation_lock', JSON.stringify({locked: false}));
+                                } else if (window.parent) {
+                                    const data = JSON.stringify({
+                                        eventType: 'web_app_toggle_orientation_lock',
+                                        eventData: { locked: false }
+                                    });
+                                    window.parent.postMessage(data, 'https://web.telegram.org');
+                                }
+                            } catch (e) {
+                                console.log('Telegram unlock fallback failed:', e);
+                            }
+                        }
+
+                        // Standard unlock
+                        if (screen.orientation && screen.orientation.unlock) {
+                            console.log('Unlocking via screen.orientation');
+                            screen.orientation.unlock();
+                        }
+
+                        // Restore Android styles
+                        if (navigator.userAgent.includes('Android')) {
+                            document.body.style.overflow = '';
+                            document.documentElement.style.overflow = '';
+                        }
+
+                    } catch (error) {
+                        console.log('Failed to unlock orientation:', error);
+                    }
+                }
+                break;
+            }
+        }
+    }
+});
+
 // Initialize player when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Only init if we're on a page with video
