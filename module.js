@@ -104,46 +104,70 @@ async function initKinescopePlayer() {
             return;
         }
 
-        // Wait a bit for iframe to be ready
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('Iframe found, waiting for it to load...');
 
-        // Create player instance from existing iframe
-        kinescopePlayer = await Kinescope.IframePlayer.create('kinescope-player');
+        // Wait for iframe to be fully loaded
+        await new Promise(resolve => {
+            if (iframe.contentWindow) {
+                setTimeout(resolve, 2000);
+            } else {
+                iframe.addEventListener('load', () => setTimeout(resolve, 1000));
+            }
+        });
 
-        console.log('Kinescope player initialized successfully');
+        console.log('Creating player instance...');
+
+        // Create player instance from existing iframe - pass the iframe element directly
+        kinescopePlayer = await Kinescope.IframePlayer.create(iframe);
+
+        console.log('Kinescope player initialized successfully', kinescopePlayer);
 
         // Listen to time updates
-        kinescopePlayer.on('timeupdate', (event) => {
-            currentVideoTime = event.data.currentTime || 0;
-            updateActiveTimecode(currentVideoTime);
-        });
+        if (kinescopePlayer && kinescopePlayer.on) {
+            kinescopePlayer.on('timeupdate', (event) => {
+                if (event && event.data) {
+                    currentVideoTime = event.data.currentTime || 0;
+                    updateActiveTimecode(currentVideoTime);
+                }
+            });
 
-        kinescopePlayer.on('ready', () => {
-            console.log('Player is ready');
-        });
+            kinescopePlayer.on('ready', () => {
+                console.log('Player is ready');
+            });
+
+            kinescopePlayer.on('error', (error) => {
+                console.error('Player error:', error);
+            });
+        }
 
         // Add click handlers to timecode items
         const timecodeItems = document.querySelectorAll('.timecode-item');
+        console.log(`Found ${timecodeItems.length} timecode items`);
+
         timecodeItems.forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', async () => {
                 const timecode = item.getAttribute('data-time');
                 const seconds = timecodeToSeconds(timecode);
 
-                console.log(`Seeking to ${timecode} (${seconds} seconds)`);
+                console.log(`Clicking timecode: ${timecode} (${seconds} seconds)`);
 
-                if (kinescopePlayer) {
-                    kinescopePlayer.seekTo(seconds).then(() => {
+                if (kinescopePlayer && kinescopePlayer.seekTo) {
+                    try {
+                        await kinescopePlayer.seekTo(seconds);
                         console.log('Seek successful');
-                        kinescopePlayer.play();
-                    }).catch(err => {
-                        console.error('Seek failed:', err);
-                    });
+                        await kinescopePlayer.play();
+                        console.log('Play started');
+                    } catch (err) {
+                        console.error('Seek/Play failed:', err);
+                    }
+                } else {
+                    console.error('Player not ready or seekTo method not available');
                 }
             });
         });
 
     } catch (error) {
-        console.error('Error initializing Kinescope player:', error);
+        console.error('Error initializing Kinescope player:', error, error.stack);
     }
 }
 
