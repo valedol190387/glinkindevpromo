@@ -299,18 +299,24 @@ function showEventDetails(index) {
 }
 
 // Вернуться к расписанию
-document.getElementById('backToSchedule').addEventListener('click', () => {
-    document.getElementById('scheduleView').style.display = 'block';
-    document.getElementById('eventView').style.display = 'none';
-    selectedModuleIndex = null;
-});
+const backToScheduleBtn = document.getElementById('backToSchedule');
+if (backToScheduleBtn) {
+    backToScheduleBtn.addEventListener('click', () => {
+        document.getElementById('scheduleView').style.display = 'block';
+        document.getElementById('eventView').style.display = 'none';
+        selectedModuleIndex = null;
+    });
+}
 
 // Открыть модалку с подробностями
-document.getElementById('openModuleModal').addEventListener('click', () => {
-    if (selectedModuleIndex !== null) {
-        showModuleModal(moduleData[selectedModuleIndex]);
-    }
-});
+const openModuleModalBtn = document.getElementById('openModuleModal');
+if (openModuleModalBtn) {
+    openModuleModalBtn.addEventListener('click', () => {
+        if (selectedModuleIndex !== null) {
+            showModuleModal(moduleData[selectedModuleIndex]);
+        }
+    });
+}
 
 // Клик по элементам расписания
 document.querySelectorAll('.schedule-item').forEach(item => {
@@ -348,30 +354,40 @@ function closeModuleModal() {
 }
 
 // Навигация по месяцам
-document.getElementById('prevMonth').addEventListener('click', () => {
-    currentMonth--;
-    if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-    }
-    generateCalendar(currentMonth, currentYear);
-});
+const prevMonthBtn = document.getElementById('prevMonth');
+if (prevMonthBtn) {
+    prevMonthBtn.addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        generateCalendar(currentMonth, currentYear);
+    });
+}
 
-document.getElementById('nextMonth').addEventListener('click', () => {
-    currentMonth++;
-    if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-    }
-    generateCalendar(currentMonth, currentYear);
-});
+const nextMonthBtn = document.getElementById('nextMonth');
+if (nextMonthBtn) {
+    nextMonthBtn.addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        generateCalendar(currentMonth, currentYear);
+    });
+}
 
 // Обработчики модального окна
 const modalClose = document.querySelector('.modal-close');
 const modalOverlay = document.querySelector('.modal-overlay');
 
-modalClose.addEventListener('click', closeModuleModal);
-modalOverlay.addEventListener('click', closeModuleModal);
+if (modalClose) {
+    modalClose.addEventListener('click', closeModuleModal);
+}
+if (modalOverlay) {
+    modalOverlay.addEventListener('click', closeModuleModal);
+}
 
 // Initialize calendar
 document.addEventListener('DOMContentLoaded', () => {

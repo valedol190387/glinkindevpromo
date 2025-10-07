@@ -33,20 +33,25 @@ toggleSection('paymentsCard', 'paymentsContent');
 toggleSection('systemCard', 'systemContent');
 
 // Help form submit
-document.querySelector('.submit-button').addEventListener('click', () => {
-    const textarea = document.querySelector('.help-textarea');
-    const message = textarea.value.trim();
+const submitButton = document.querySelector('.submit-button');
+if (submitButton) {
+    submitButton.addEventListener('click', () => {
+        const textarea = document.querySelector('.help-textarea');
+        const message = textarea.value.trim();
 
-    if (message) {
-        alert('Ваше сообщение отправлено! Мы свяжемся с вами в ближайшее время.');
-        textarea.value = '';
-    } else {
-        alert('Пожалуйста, опишите вашу проблему или вопрос.');
-    }
-});
+        if (message) {
+            alert('Ваше сообщение отправлено! Мы свяжемся с вами в ближайшее время.');
+            textarea.value = '';
+        } else {
+            alert('Пожалуйста, опишите вашу проблему или вопрос.');
+        }
+    });
+}
 
 // Copy system info
-document.getElementById('copySystemInfo').addEventListener('click', () => {
+const copySystemInfoBtn = document.getElementById('copySystemInfo');
+if (copySystemInfoBtn) {
+    copySystemInfoBtn.addEventListener('click', () => {
     const browserInfo = document.getElementById('browserInfo').textContent;
     const osInfo = document.getElementById('osInfo').textContent;
     const deviceInfo = document.getElementById('deviceInfo').textContent;
@@ -79,7 +84,8 @@ User Agent: ${userAgentInfo}
     }).catch(() => {
         alert('Не удалось скопировать данные');
     });
-});
+    });
+}
 
 // Detect real system info (optional - can replace mock data)
 function detectSystemInfo() {

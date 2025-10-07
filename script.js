@@ -568,12 +568,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalOverlay = document.querySelector('.modal-overlay');
     const modalBuyButton = document.querySelector('.modal-buy-button');
 
-    modalClose.addEventListener('click', closeModuleModal);
-    modalOverlay.addEventListener('click', closeModuleModal);
+    if (modalClose) {
+        modalClose.addEventListener('click', closeModuleModal);
+    }
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', closeModuleModal);
+    }
 
     let currentModuleIndex = 0;
 
-    modalBuyButton.addEventListener('click', () => {
+    if (modalBuyButton) {
+        modalBuyButton.addEventListener('click', () => {
         // Simulate payment success - unlock module
         const originalCards = document.querySelectorAll('.carousel-card:not(.clone)');
         const card = originalCards[currentModuleIndex];
@@ -604,7 +609,8 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Оплата успешна! Модуль разблокирован.');
             window.location.href = `module.html?module=${currentModuleIndex}`;
         }, 300);
-    });
+        });
+    }
 
     // Track current module for purchase
     window.setCurrentModuleForPurchase = (index) => {
