@@ -102,66 +102,31 @@ function timecodeToSeconds(timecode) {
     return 0;
 }
 
-// Create Kinescope iframe dynamically (like colleague's method)
-function createKinescopePlayer() {
-    const videoContainer = document.getElementById('video-container');
-    if (!videoContainer) {
-        console.error('Video container not found');
-        return;
-    }
-
-    console.log('Creating Kinescope player with ID:', KINESCOPE_ID);
-
-    // Create iframe HTML exactly like colleague's code - NO BORDER RADIUS, PURE CLEAN
-    const iframeHTML = `
-        <div class="kinescope-container">
-            <div style="position: relative; padding-top: 56.25%; width: 100%">
-                <iframe
-                    id="kinescope-player"
-                    src="https://kinescope.io/embed/${KINESCOPE_ID}"
-                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;"
-                    frameborder="0"
-                    allowfullscreen
-                    webkitallowfullscreen
-                    mozallowfullscreen
-                    style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;">
-                </iframe>
-            </div>
-        </div>
-    `;
-
-    videoContainer.innerHTML = iframeHTML;
-    console.log('Kinescope iframe created and injected into DOM');
-    console.log('Check if iframe is visible:', document.getElementById('kinescope-player'));
-}
-
-// Initialize Kinescope player - SIMPLE VERSION FIRST
+// Initialize Kinescope player - connect to existing static iframe
 async function initKinescopePlayer() {
     try {
-        // STEP 1: Just create the iframe first - test if it shows up
-        console.log('STEP 1: Creating iframe...');
-        createKinescopePlayer();
-
-        // Wait a bit to see if iframe loads
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        const iframe = document.getElementById('kinescope-player');
-        console.log('STEP 2: Iframe element:', iframe);
-        console.log('STEP 3: Iframe src:', iframe?.src);
-        console.log('STEP 4: Iframe visible in DOM?', iframe ? 'YES' : 'NO');
-
-        // STEP 2: Try to connect API (optional for now)
-        console.log('STEP 5: Loading Kinescope API...');
-        const Kinescope = await loadKinescopeScript();
-        console.log('STEP 6: Kinescope API loaded');
+        console.log('Initializing Kinescope player...');
 
         // Wait for iframe to be ready
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        const iframe = document.getElementById('kinescope-player');
+        if (!iframe) {
+            console.error('Iframe not found!');
+            return;
+        }
+
+        console.log('Found iframe, loading Kinescope API...');
+        const Kinescope = await loadKinescopeScript();
+        console.log('Kinescope API loaded');
+
+        // Wait a bit more
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         // Connect to iframe player
-        console.log('STEP 7: Connecting to iframe player...');
+        console.log('Connecting to player...');
         kinescopePlayer = await Kinescope.IframePlayer.create(iframe);
-        console.log('STEP 8: Player connected:', kinescopePlayer);
+        console.log('Player connected!');
 
         // Listen to time updates
         kinescopePlayer.on('timeupdate', (event) => {
@@ -398,12 +363,12 @@ window.triggerFullscreen = triggerFullscreen;
 // Initialize player when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Only init if we're on a page with video
-    const videoContainer = document.getElementById('video-container');
-    if (videoContainer) {
+    const iframe = document.getElementById('kinescope-player');
+    if (iframe) {
         console.log('DOM ready, initializing Kinescope player...');
         initKinescopePlayer();
     } else {
-        console.log('No video container found on this page');
+        console.log('No iframe found on this page');
     }
 });
 

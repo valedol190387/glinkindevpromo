@@ -36,8 +36,21 @@
         <!-- Запись лекции -->
         <div class="content-section glass-effect">
             <h3 class="section-title">📹 Запись лекции по модулю №1 Селезёнка</h3>
-            <div id="video-container" class="video-container">
-                <!-- Kinescope player will be injected here via JavaScript -->
+            <div class="video-container">
+                <div class="kinescope-container">
+                    <div style="position: relative; padding-top: 56.25%; width: 100%">
+                        <iframe
+                            id="kinescope-player"
+                            src="https://kinescope.io/embed/4yRzZsxobzqBeUc711ZPun"
+                            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;"
+                            frameborder="0"
+                            allowfullscreen
+                            webkitallowfullscreen
+                            mozallowfullscreen
+                            style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;">
+                        </iframe>
+                    </div>
+                </div>
             </div>
 
             <!-- Таймкоды -->
