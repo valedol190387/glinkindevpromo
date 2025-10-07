@@ -109,6 +109,9 @@ async function initKinescopePlayer() {
         const Kinescope = await loadKinescopeScript();
         console.log('Kinescope script loaded successfully');
 
+        // Detect if it's Android
+        const isAndroid = /Android/i.test(navigator.userAgent);
+
         const playerOptions = {
             url: VIDEO_URL,
             size: {
@@ -117,9 +120,12 @@ async function initKinescopePlayer() {
             },
             behavior: {
                 preload: 'auto',
-                playsInline: true
+                playsInline: isAndroid ? false : true, // false for Android = auto fullscreen on play
+                muted: false
             }
         };
+
+        console.log('Is Android:', isAndroid, 'playsInline:', playerOptions.behavior.playsInline);
 
         console.log('Creating player with options:', playerOptions);
 
