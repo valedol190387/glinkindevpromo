@@ -50,8 +50,8 @@ if (module) {
 let kinescopePlayer = null;
 let currentVideoTime = 0;
 
-// Video URL for the module
-const VIDEO_URL = "https://kinescope.io/4yRzZsxobzqBeUc711ZPun";
+// Kinescope video ID for the module
+const KINESCOPE_ID = "4yRzZsxobzqBeUc711ZPun";
 
 // Load Kinescope API script
 let kinescopePromise = null;
@@ -102,32 +102,59 @@ function timecodeToSeconds(timecode) {
     return 0;
 }
 
-// Initialize Kinescope player - connect to existing iframe
+// Create Kinescope iframe dynamically (like colleague's method)
+function createKinescopePlayer() {
+    const videoContainer = document.getElementById('video-container');
+    if (!videoContainer) {
+        console.error('Video container not found');
+        return;
+    }
+
+    console.log('Creating Kinescope player with ID:', KINESCOPE_ID);
+
+    // Create iframe HTML exactly like colleague's code
+    const iframeHTML = `
+        <div class="kinescope-container">
+            <div style="position: relative; padding-top: 56.25%; width: 100%">
+                <iframe
+                    id="kinescope-player"
+                    src="https://kinescope.io/embed/${KINESCOPE_ID}"
+                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;"
+                    frameborder="0"
+                    allowfullscreen
+                    style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 16px;">
+                </iframe>
+            </div>
+        </div>
+    `;
+
+    videoContainer.innerHTML = iframeHTML;
+    console.log('Kinescope iframe created');
+}
+
+// Initialize Kinescope player - connect to dynamically created iframe
 async function initKinescopePlayer() {
     try {
+        // First create the iframe
+        createKinescopePlayer();
+
         console.log('Loading Kinescope script...');
         const Kinescope = await loadKinescopeScript();
         console.log('Kinescope script loaded successfully');
 
-        // Get the existing iframe
+        // Wait for iframe to be ready
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Get the iframe
         const iframe = document.getElementById('kinescope-player');
-        if (!iframe || !iframe.src) {
-            console.error('Iframe not found or has no src');
+        if (!iframe) {
+            console.error('Iframe not found after creation');
             return;
         }
 
-        console.log('Connecting to existing iframe with src:', iframe.src);
+        console.log('Connecting to iframe...');
 
-        // Wait for iframe to load
-        await new Promise(resolve => {
-            if (iframe.contentWindow) {
-                setTimeout(resolve, 1500);
-            } else {
-                iframe.addEventListener('load', () => setTimeout(resolve, 1000));
-            }
-        });
-
-        // Connect to existing iframe player
+        // Connect to iframe player
         kinescopePlayer = await Kinescope.IframePlayer.create(iframe);
 
         console.log('Player connected successfully:', kinescopePlayer);
@@ -367,29 +394,10 @@ window.triggerFullscreen = triggerFullscreen;
 // Initialize player when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Only init if we're on a page with video
-    const videoContainer = document.getElementById('kinescope-player');
+    const videoContainer = document.getElementById('video-container');
     if (videoContainer) {
         console.log('DOM ready, initializing Kinescope player...');
         initKinescopePlayer();
-
-        // For Android - add double-tap on video container to go fullscreen
-        const container = document.querySelector('.video-container');
-        let lastTap = 0;
-
-        if (container && /Android/i.test(navigator.userAgent)) {
-            console.log('Android detected - adding double-tap fullscreen');
-            container.addEventListener('touchend', (e) => {
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTap;
-
-                if (tapLength < 500 && tapLength > 0) {
-                    console.log('Double tap detected, triggering fullscreen');
-                    triggerFullscreen();
-                    e.preventDefault();
-                }
-                lastTap = currentTime;
-            });
-        }
     } else {
         console.log('No video container found on this page');
     }
