@@ -46,10 +46,48 @@ if (module) {
 // For now, all modules show the same content (mock data)
 // In the future, you can customize content per module
 
-// Kinescope Player Integration for Timecodes - Using postMessage API
-let kinescopeIframe = null;
+// Kinescope Player Integration for Timecodes
+let kinescopePlayer = null;
 let currentVideoTime = 0;
-let isPlayerReady = false;
+
+// Video URL for the module
+const VIDEO_URL = "https://kinescope.io/4yRzZsxobzqBeUc711ZPun";
+
+// Load Kinescope API script
+let kinescopePromise = null;
+
+function loadKinescopeScript() {
+    if (kinescopePromise) return kinescopePromise;
+
+    kinescopePromise = new Promise((resolve, reject) => {
+        if (window.Kinescope) {
+            resolve(window.Kinescope);
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://player.kinescope.io/latest/iframe.player.js';
+        script.async = true;
+
+        script.onload = () => {
+            const checkAPI = setInterval(() => {
+                if (window.Kinescope) {
+                    clearInterval(checkAPI);
+                    resolve(window.Kinescope);
+                }
+            }, 100);
+        };
+
+        script.onerror = () => {
+            kinescopePromise = null;
+            reject(new Error('Failed to load Kinescope script'));
+        };
+
+        document.head.appendChild(script);
+    });
+
+    return kinescopePromise;
+}
 
 // Convert timecode string to seconds
 function timecodeToSeconds(timecode) {
@@ -64,103 +102,71 @@ function timecodeToSeconds(timecode) {
     return 0;
 }
 
-// Send command to Kinescope player via postMessage
-function sendPlayerCommand(action, value) {
-    if (!kinescopeIframe || !kinescopeIframe.contentWindow) {
-        console.error('Iframe not ready');
-        return;
-    }
+// Initialize Kinescope player - exactly like in the example
+async function initKinescopePlayer() {
+    try {
+        console.log('Loading Kinescope script...');
+        const Kinescope = await loadKinescopeScript();
+        console.log('Kinescope script loaded successfully');
 
-    const message = {
-        method: action,
-        value: value
-    };
-
-    console.log('Sending command to player:', message);
-    kinescopeIframe.contentWindow.postMessage(JSON.stringify(message), '*');
-}
-
-// Listen to messages from Kinescope player
-function setupPlayerMessageListener() {
-    window.addEventListener('message', (event) => {
-        try {
-            const data = JSON.parse(event.data);
-
-            if (data.event === 'ready') {
-                isPlayerReady = true;
-                console.log('Player is ready!');
+        const playerOptions = {
+            url: VIDEO_URL,
+            size: {
+                width: '100%',
+                height: '100%'
+            },
+            behavior: {
+                preload: 'auto',
+                playsInline: true
             }
+        };
 
-            if (data.event === 'timeupdate' && data.data) {
-                currentVideoTime = data.data.currentTime || 0;
+        console.log('Creating player with options:', playerOptions);
+
+        // Create player - pass the iframe ID, not the element
+        kinescopePlayer = await Kinescope.IframePlayer.create(
+            'kinescope-player',
+            playerOptions
+        );
+
+        console.log('Player created successfully:', kinescopePlayer);
+
+        // Listen to time updates
+        kinescopePlayer.on('timeupdate', (event) => {
+            if (event && event.data) {
+                currentVideoTime = event.data.currentTime || 0;
                 updateActiveTimecode(currentVideoTime);
             }
-        } catch (e) {
-            // Not a valid JSON message, ignore
-        }
-    });
-}
-
-// Initialize Kinescope player with postMessage API
-function initKinescopePlayer() {
-    // Get the iframe element by ID
-    kinescopeIframe = document.getElementById('kinescope-player');
-
-    if (!kinescopeIframe) {
-        console.error('Kinescope iframe not found');
-        return;
-    }
-
-    console.log('Kinescope iframe found, setting up...');
-
-    // Setup message listener
-    setupPlayerMessageListener();
-
-    // Wait for iframe to load
-    const checkReady = () => {
-        if (kinescopeIframe.contentWindow) {
-            console.log('Iframe loaded, requesting ready state...');
-            // Request ready event
-            sendPlayerCommand('addEventListener', 'ready');
-            sendPlayerCommand('addEventListener', 'timeupdate');
-
-            setTimeout(() => {
-                isPlayerReady = true;
-                console.log('Player assumed ready after timeout');
-            }, 2000);
-        }
-    };
-
-    if (kinescopeIframe.contentWindow) {
-        setTimeout(checkReady, 1000);
-    } else {
-        kinescopeIframe.addEventListener('load', () => setTimeout(checkReady, 500));
-    }
-
-    // Add click handlers to timecode items
-    const timecodeItems = document.querySelectorAll('.timecode-item');
-    console.log(`Found ${timecodeItems.length} timecode items`);
-
-    timecodeItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const timecode = item.getAttribute('data-time');
-            const seconds = timecodeToSeconds(timecode);
-
-            console.log(`Clicking timecode: ${timecode} (${seconds} seconds)`);
-
-            if (!isPlayerReady) {
-                console.warn('Player might not be ready yet, trying anyway...');
-            }
-
-            // Seek to time
-            sendPlayerCommand('seekTo', seconds);
-
-            // Play video
-            setTimeout(() => {
-                sendPlayerCommand('play');
-            }, 300);
         });
-    });
+
+        kinescopePlayer.on('ready', () => {
+            console.log('Player is ready!');
+        });
+
+        kinescopePlayer.on('error', (error) => {
+            console.error('Player error:', error);
+        });
+
+        // Add click handlers to timecode items
+        const timecodeItems = document.querySelectorAll('.timecode-item');
+        console.log(`Found ${timecodeItems.length} timecode items`);
+
+        timecodeItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const timecode = item.getAttribute('data-time');
+                const seconds = timecodeToSeconds(timecode);
+
+                console.log(`Seeking to: ${timecode} (${seconds} seconds)`);
+
+                if (kinescopePlayer) {
+                    kinescopePlayer.seekTo(seconds);
+                }
+            });
+        });
+
+    } catch (error) {
+        console.error('Error initializing Kinescope player:', error);
+    }
 }
 
 // Update active timecode based on current video time
@@ -191,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Only init if we're on a page with video
     const videoContainer = document.getElementById('kinescope-player');
     if (videoContainer) {
-        console.log('Found video container, initializing player with postMessage API...');
+        console.log('DOM ready, initializing Kinescope player...');
         initKinescopePlayer();
     } else {
         console.log('No video container found on this page');
