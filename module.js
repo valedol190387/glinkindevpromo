@@ -112,7 +112,7 @@ function createKinescopePlayer() {
 
     console.log('Creating Kinescope player with ID:', KINESCOPE_ID);
 
-    // Create iframe HTML exactly like colleague's code
+    // Create iframe HTML exactly like colleague's code - NO BORDER RADIUS, PURE CLEAN
     const iframeHTML = `
         <div class="kinescope-container">
             <div style="position: relative; padding-top: 56.25%; width: 100%">
@@ -122,42 +122,46 @@ function createKinescopePlayer() {
                     allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;"
                     frameborder="0"
                     allowfullscreen
-                    style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 16px;">
+                    webkitallowfullscreen
+                    mozallowfullscreen
+                    style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;">
                 </iframe>
             </div>
         </div>
     `;
 
     videoContainer.innerHTML = iframeHTML;
-    console.log('Kinescope iframe created');
+    console.log('Kinescope iframe created and injected into DOM');
+    console.log('Check if iframe is visible:', document.getElementById('kinescope-player'));
 }
 
-// Initialize Kinescope player - connect to dynamically created iframe
+// Initialize Kinescope player - SIMPLE VERSION FIRST
 async function initKinescopePlayer() {
     try {
-        // First create the iframe
+        // STEP 1: Just create the iframe first - test if it shows up
+        console.log('STEP 1: Creating iframe...');
         createKinescopePlayer();
 
-        console.log('Loading Kinescope script...');
+        // Wait a bit to see if iframe loads
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const iframe = document.getElementById('kinescope-player');
+        console.log('STEP 2: Iframe element:', iframe);
+        console.log('STEP 3: Iframe src:', iframe?.src);
+        console.log('STEP 4: Iframe visible in DOM?', iframe ? 'YES' : 'NO');
+
+        // STEP 2: Try to connect API (optional for now)
+        console.log('STEP 5: Loading Kinescope API...');
         const Kinescope = await loadKinescopeScript();
-        console.log('Kinescope script loaded successfully');
+        console.log('STEP 6: Kinescope API loaded');
 
         // Wait for iframe to be ready
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Get the iframe
-        const iframe = document.getElementById('kinescope-player');
-        if (!iframe) {
-            console.error('Iframe not found after creation');
-            return;
-        }
-
-        console.log('Connecting to iframe...');
-
         // Connect to iframe player
+        console.log('STEP 7: Connecting to iframe player...');
         kinescopePlayer = await Kinescope.IframePlayer.create(iframe);
-
-        console.log('Player connected successfully:', kinescopePlayer);
+        console.log('STEP 8: Player connected:', kinescopePlayer);
 
         // Listen to time updates
         kinescopePlayer.on('timeupdate', (event) => {
@@ -193,7 +197,7 @@ async function initKinescopePlayer() {
         });
 
     } catch (error) {
-        console.error('Error initializing Kinescope player:', error);
+        console.error('ERROR in initKinescopePlayer:', error);
     }
 }
 
