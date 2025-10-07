@@ -258,7 +258,7 @@ class Carousel {
 <strong>Зачем восстанавливать селезёнку:</strong>
 Потому что именно с неё начинается баланс всей системы пищеварения и энергия жизни. Восстановив селезёнку, вы почувствуете: лёгкость после еды, прилив сил, ясность ума, стабильное настроение и крепкий иммунитет.`,
                 price: '16 900 ₽',
-                image: 'images/1.png'
+                image: 'images/1.webp'
             },
             {
                 title: 'Желудок',
@@ -291,7 +291,7 @@ class Carousel {
 
 Желудок — это не просто про еду. Это про качество вашей жизни.`,
                 price: '16 900 ₽',
-                image: 'images/2.png'
+                image: 'images/2.webp'
             },
             {
                 title: 'Печень',
@@ -327,7 +327,7 @@ class Carousel {
 
 Печень — это не только про здоровье. Это про вашу молодость, красоту и гармонию.`,
                 price: '16 900 ₽',
-                image: 'images/3.png'
+                image: 'images/3.webp'
             },
             {
                 title: 'Желчный пузырь',
@@ -364,7 +364,7 @@ class Carousel {
 
 Желчный пузырь — это про движение. И в теле, и в жизни.`,
                 price: '16 900 ₽',
-                image: 'images/4.png'
+                image: 'images/4.webp'
             },
             {
                 title: 'Поджелудочная железа',
@@ -398,7 +398,7 @@ class Carousel {
 
 Поджелудочная железа — это не только про пищеварение. Это про ваш баланс энергии, веса и стабильного эмоционального состояния.`,
                 price: '16 900 ₽',
-                image: 'images/5.png'
+                image: 'images/5.webp'
             },
             {
                 title: 'Кишечник',
@@ -435,7 +435,7 @@ class Carousel {
 
 Кишечник — это про твою жизнь, красоту, счастье и долголетие.`,
                 price: '16 900 ₽',
-                image: 'images/6.png'
+                image: 'images/6.webp'
             }
         ];
 
@@ -444,16 +444,36 @@ class Carousel {
     }
 }
 
-// Header interactions
-const calendarIcon = document.querySelector('.calendar-icon');
-const profileAvatar = document.querySelector('.profile-avatar');
+// Bottom Navigation
+const navItems = document.querySelectorAll('.nav-item');
 
-calendarIcon.addEventListener('click', () => {
-    window.location.href = 'calendar.html';
-});
+navItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const page = item.getAttribute('data-page');
 
-profileAvatar.addEventListener('click', () => {
-    window.location.href = 'profile.html';
+        // Update active state
+        navItems.forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
+
+        // Navigate to page
+        switch(page) {
+            case 'index':
+                // Already on main page
+                break;
+            case 'calendar':
+                window.location.href = 'calendar.html';
+                break;
+            case 'bonuses':
+                window.location.href = 'bonuses.html';
+                break;
+            case 'products':
+                window.location.href = 'products.html';
+                break;
+            case 'profile':
+                window.location.href = 'profile.html';
+                break;
+        }
+    });
 });
 
 // Package modal

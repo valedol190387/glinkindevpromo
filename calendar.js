@@ -29,7 +29,7 @@ const moduleData = [
 <strong>Зачем восстанавливать селезёнку:</strong>
 Потому что именно с неё начинается баланс всей системы пищеварения и энергия жизни. Восстановив селезёнку, вы почувствуете: лёгкость после еды, прилив сил, ясность ума, стабильное настроение и крепкий иммунитет.`,
         price: '16 900 ₽',
-        image: 'images/1.png'
+        image: 'images/1.webp'
     },
     {
         date: '2024-10-11',
@@ -64,7 +64,7 @@ const moduleData = [
 
 Желудок — это не просто про еду. Это про качество вашей жизни.`,
         price: '16 900 ₽',
-        image: 'images/2.png'
+        image: 'images/2.webp'
     },
     {
         date: '2024-10-18',
@@ -102,7 +102,7 @@ const moduleData = [
 
 Печень — это не только про здоровье. Это про вашу молодость, красоту и гармонию.`,
         price: '16 900 ₽',
-        image: 'images/3.png'
+        image: 'images/3.webp'
     },
     {
         date: '2024-10-25',
@@ -141,7 +141,7 @@ const moduleData = [
 
 Желчный пузырь — это про движение. И в теле, и в жизни.`,
         price: '16 900 ₽',
-        image: 'images/4.png'
+        image: 'images/4.webp'
     },
     {
         date: '2024-11-01',
@@ -177,7 +177,7 @@ const moduleData = [
 
 Поджелудочная железа — это не только про пищеварение. Это про ваш баланс энергии, веса и стабильного эмоционального состояния.`,
         price: '16 900 ₽',
-        image: 'images/5.png'
+        image: 'images/5.webp'
     },
     {
         date: '2024-11-08',
@@ -216,7 +216,7 @@ const moduleData = [
 
 Кишечник — это про твою жизнь, красоту, счастье и долголетие.`,
         price: '16 900 ₽',
-        image: 'images/6.png'
+        image: 'images/6.webp'
     }
 ];
 
@@ -376,4 +376,36 @@ modalOverlay.addEventListener('click', closeModuleModal);
 // Initialize calendar
 document.addEventListener('DOMContentLoaded', () => {
     generateCalendar(currentMonth, currentYear);
+});
+
+// Bottom Navigation
+const navItems = document.querySelectorAll('.nav-item');
+
+navItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const page = item.getAttribute('data-page');
+
+        // Update active state
+        navItems.forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
+
+        // Navigate to page
+        switch(page) {
+            case 'index':
+                window.location.href = 'index.html';
+                break;
+            case 'calendar':
+                // Already on calendar page
+                break;
+            case 'bonuses':
+                window.location.href = 'bonuses.html';
+                break;
+            case 'products':
+                window.location.href = 'products.html';
+                break;
+            case 'profile':
+                window.location.href = 'profile.html';
+                break;
+        }
+    });
 });

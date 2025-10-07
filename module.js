@@ -45,3 +45,35 @@ if (module) {
 
 // For now, all modules show the same content (mock data)
 // In the future, you can customize content per module
+
+// Bottom Navigation
+const navItems = document.querySelectorAll('.nav-item');
+
+navItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const page = item.getAttribute('data-page');
+
+        // Update active state
+        navItems.forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
+
+        // Navigate to page
+        switch(page) {
+            case 'index':
+                window.location.href = 'index.html';
+                break;
+            case 'calendar':
+                window.location.href = 'calendar.html';
+                break;
+            case 'bonuses':
+                window.location.href = 'bonuses.html';
+                break;
+            case 'products':
+                window.location.href = 'products.html';
+                break;
+            case 'profile':
+                window.location.href = 'profile.html';
+                break;
+        }
+    });
+});
