@@ -147,6 +147,28 @@ async function initKinescopePlayer() {
             console.error('Player error:', error);
         });
 
+        // Auto-fullscreen on play for mobile devices (especially Android)
+        let hasAutoFullscreened = false;
+
+        kinescopePlayer.on('play', async () => {
+            console.log('Play event detected');
+
+            // Check if it's a mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isAndroid = /Android/i.test(navigator.userAgent);
+
+            if ((isMobile || isAndroid) && !hasAutoFullscreened) {
+                try {
+                    console.log('Mobile device detected, entering fullscreen...');
+                    await kinescopePlayer.setFullscreen(true);
+                    hasAutoFullscreened = true;
+                    console.log('Fullscreen activated');
+                } catch (error) {
+                    console.error('Failed to enter fullscreen:', error);
+                }
+            }
+        });
+
         // Add click handlers to timecode items
         const timecodeItems = document.querySelectorAll('.timecode-item');
         console.log(`Found ${timecodeItems.length} timecode items`);
