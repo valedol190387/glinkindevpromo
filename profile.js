@@ -98,9 +98,45 @@ function detectSystemInfo() {
     // document.getElementById('resolutionInfo').textContent = `${screenWidth}x${screenHeight}`;
 }
 
+// Load Telegram user data
+function loadTelegramUserData() {
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        const user = tg.initDataUnsafe?.user;
+
+        if (user) {
+            console.log('Telegram user data:', user);
+
+            // Update avatar
+            const avatarImg = document.querySelector('.profile-avatar');
+            if (user.photo_url) {
+                avatarImg.src = user.photo_url;
+            }
+
+            // Update name
+            const nameElement = document.querySelector('.profile-name');
+            const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+            if (fullName) {
+                nameElement.textContent = fullName;
+            }
+
+            // Update Telegram ID/username
+            const telegramElement = document.querySelector('.profile-telegram');
+            if (user.username) {
+                telegramElement.textContent = `@${user.username}`;
+            } else {
+                telegramElement.textContent = `Telegram ID: ${user.id}`;
+            }
+        } else {
+            console.log('No Telegram user data available (not running in Telegram or no user data)');
+        }
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     detectSystemInfo();
+    loadTelegramUserData();
 });
 
 // Bottom Navigation
