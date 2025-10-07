@@ -102,40 +102,35 @@ function timecodeToSeconds(timecode) {
     return 0;
 }
 
-// Initialize Kinescope player - exactly like in the example
+// Initialize Kinescope player - connect to existing iframe
 async function initKinescopePlayer() {
     try {
         console.log('Loading Kinescope script...');
         const Kinescope = await loadKinescopeScript();
         console.log('Kinescope script loaded successfully');
 
-        // Detect if it's Android
-        const isAndroid = /Android/i.test(navigator.userAgent);
+        // Get the existing iframe
+        const iframe = document.getElementById('kinescope-player');
+        if (!iframe || !iframe.src) {
+            console.error('Iframe not found or has no src');
+            return;
+        }
 
-        const playerOptions = {
-            url: VIDEO_URL,
-            size: {
-                width: '100%',
-                height: '100%'
-            },
-            behavior: {
-                preload: 'auto',
-                playsInline: isAndroid ? false : true, // false for Android = auto fullscreen on play
-                muted: false
+        console.log('Connecting to existing iframe with src:', iframe.src);
+
+        // Wait for iframe to load
+        await new Promise(resolve => {
+            if (iframe.contentWindow) {
+                setTimeout(resolve, 1500);
+            } else {
+                iframe.addEventListener('load', () => setTimeout(resolve, 1000));
             }
-        };
+        });
 
-        console.log('Is Android:', isAndroid, 'playsInline:', playerOptions.behavior.playsInline);
+        // Connect to existing iframe player
+        kinescopePlayer = await Kinescope.IframePlayer.create(iframe);
 
-        console.log('Creating player with options:', playerOptions);
-
-        // Create player - pass the iframe ID, not the element
-        kinescopePlayer = await Kinescope.IframePlayer.create(
-            'kinescope-player',
-            playerOptions
-        );
-
-        console.log('Player created successfully:', kinescopePlayer);
+        console.log('Player connected successfully:', kinescopePlayer);
 
         // Listen to time updates
         kinescopePlayer.on('timeupdate', (event) => {
@@ -151,28 +146,6 @@ async function initKinescopePlayer() {
 
         kinescopePlayer.on('error', (error) => {
             console.error('Player error:', error);
-        });
-
-        // Auto-fullscreen on play for mobile devices (especially Android)
-        let hasAutoFullscreened = false;
-
-        kinescopePlayer.on('play', async () => {
-            console.log('Play event detected');
-
-            // Check if it's a mobile device
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const isAndroid = /Android/i.test(navigator.userAgent);
-
-            if ((isMobile || isAndroid) && !hasAutoFullscreened) {
-                try {
-                    console.log('Mobile device detected, entering fullscreen...');
-                    await kinescopePlayer.setFullscreen(true);
-                    hasAutoFullscreened = true;
-                    console.log('Fullscreen activated');
-                } catch (error) {
-                    console.error('Failed to enter fullscreen:', error);
-                }
-            }
         });
 
         // Add click handlers to timecode items
