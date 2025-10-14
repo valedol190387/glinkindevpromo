@@ -9,6 +9,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="module.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // Initialize Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand(); // Expand to full viewport
+
+            // Try to request fullscreen if available (Mini Apps 2.0)
+            if (tg.requestFullscreen) {
+                tg.requestFullscreen();
+            }
+        }
+    </script>
 </head>
 <body>
     <!-- Градиентный фон -->
@@ -41,13 +54,15 @@
                     <div style="position: relative; padding-top: 56.25%; width: 100%">
                         <iframe
                             id="kinescope-player"
-                            src="https://kinescope.io/embed/hNUqb8FXReY9pXWFtMCLEV"
+                            src="https://kinescope.io/embed/hNUqb8FXReY9pXWFtMCLEV?mainPlayButton=false&playbackRateButton=false"
                             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;"
                             frameborder="0"
-                            allowfullscreen
-                            webkitallowfullscreen
-                            mozallowfullscreen
-                            style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;">
+                            allowfullscreen="true"
+                            webkitallowfullscreen="true"
+                            mozallowfullscreen="true"
+                            oallowfullscreen="true"
+                            msallowfullscreen="true"
+                            style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none;">
                         </iframe>
                     </div>
                 </div>
@@ -96,6 +111,96 @@
         </button>
     </nav>
 
+    <script>
+        // Enhanced fullscreen handling for Telegram WebView
+        document.addEventListener('DOMContentLoaded', function() {
+            const iframe = document.getElementById('kinescope-player');
+
+            // Listen for fullscreen change events from Kinescope player
+            window.addEventListener('message', function(event) {
+                // Check if message is from Kinescope player
+                if (event.data && event.data.type) {
+                    console.log('Kinescope event:', event.data.type);
+
+                    // Handle fullscreen request
+                    if (event.data.type === 'KINESCOPE_PLAYER_FULLSCREEN_CHANGE') {
+                        const isFullscreen = event.data.value;
+
+                        if (isFullscreen) {
+                            // Entering fullscreen
+                            console.log('Entering fullscreen mode');
+
+                            // Style the iframe for fullscreen
+                            iframe.style.cssText = `
+                                position: fixed !important;
+                                top: 0 !important;
+                                left: 0 !important;
+                                width: 100% !important;
+                                height: 100% !important;
+                                z-index: 9999 !important;
+                                background: #000 !important;
+                                border: none !important;
+                            `;
+
+                            // Hide other content
+                            document.body.style.overflow = 'hidden';
+                            const mainContent = document.querySelector('.main-content');
+                            const bottomNav = document.querySelector('.bottom-nav');
+                            const header = document.querySelector('.header');
+
+                            if (mainContent) mainContent.style.display = 'none';
+                            if (bottomNav) bottomNav.style.display = 'none';
+                            if (header) header.style.display = 'none';
+
+                            // Try to lock orientation to landscape
+                            if (window.Telegram && window.Telegram.WebApp) {
+                                try {
+                                    if (window.Telegram.WebApp.lockOrientation) {
+                                        window.Telegram.WebApp.lockOrientation('landscape');
+                                    }
+                                } catch (e) {
+                                    console.log('Could not lock orientation:', e);
+                                }
+                            }
+
+                        } else {
+                            // Exiting fullscreen
+                            console.log('Exiting fullscreen mode');
+
+                            // Reset iframe style
+                            iframe.style.cssText = 'position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none;';
+
+                            // Show content again
+                            document.body.style.overflow = '';
+                            const mainContent = document.querySelector('.main-content');
+                            const bottomNav = document.querySelector('.bottom-nav');
+                            const header = document.querySelector('.header');
+
+                            if (mainContent) mainContent.style.display = '';
+                            if (bottomNav) bottomNav.style.display = '';
+                            if (header) header.style.display = '';
+
+                            // Unlock orientation
+                            if (window.Telegram && window.Telegram.WebApp) {
+                                try {
+                                    if (window.Telegram.WebApp.unlockOrientation) {
+                                        window.Telegram.WebApp.unlockOrientation();
+                                    }
+                                } catch (e) {
+                                    console.log('Could not unlock orientation:', e);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Fallback: Make iframe container clickable to trigger native fullscreen
+            iframe.addEventListener('click', function(e) {
+                console.log('Iframe clicked');
+            });
+        });
+    </script>
     <script src="module.js"></script>
 </body>
 </html>
