@@ -54,7 +54,12 @@ class Carousel {
                             this.openModal(this.currentIndex);
                         } else {
                             // Open module content page
-                            window.location.href = `module.html?module=${this.currentIndex}`;
+                            // Module 3 (index 2 = Печень) -> testvideo.html
+                            if (this.currentIndex === 2) {
+                                window.location.href = 'testvideo.html';
+                            } else {
+                                window.location.href = `module.html?module=${this.currentIndex}`;
+                            }
                         }
                     }
                 }
