@@ -112,94 +112,149 @@
     </nav>
 
     <script>
-        // Enhanced fullscreen handling for Telegram WebView
-        document.addEventListener('DOMContentLoaded', function() {
-            const iframe = document.getElementById('kinescope-player');
-
-            // Listen for fullscreen change events from Kinescope player
-            window.addEventListener('message', function(event) {
-                // Check if message is from Kinescope player
-                if (event.data && event.data.type) {
-                    console.log('Kinescope event:', event.data.type);
-
-                    // Handle fullscreen request
-                    if (event.data.type === 'KINESCOPE_PLAYER_FULLSCREEN_CHANGE') {
-                        const isFullscreen = event.data.value;
-
-                        if (isFullscreen) {
-                            // Entering fullscreen
+        // Kinescope Fullscreen Events Handler (based on colleague's working implementation)
+        window.onmessage = (event) => {
+            if(event.data.type && event.data.type === 'KINESCOPE_PLAYER_FULLSCREEN_CHANGE'){
+                const frames = document.getElementsByTagName('iframe');
+                for (let i = 0; i < frames.length; i++) {
+                    if (frames[i].contentWindow === event.source) {
+                        if(event.data.value){
+                            // Входим в полноэкранный режим
                             console.log('Entering fullscreen mode');
-
-                            // Style the iframe for fullscreen
-                            iframe.style.cssText = `
-                                position: fixed !important;
-                                top: 0 !important;
-                                left: 0 !important;
-                                width: 100% !important;
-                                height: 100% !important;
-                                z-index: 9999 !important;
-                                background: #000 !important;
-                                border: none !important;
+                            window.oldFrameStyles = frames[i].style.cssText;
+                            frames[i].style.cssText = `
+                                background: #000;
+                                border: none;
+                                position: fixed;
+                                z-index: 9999;
+                                width: 100%;
+                                height: 100%;
+                                bottom: 0;
+                                right: 0;
+                                top: 0;
+                                left: 0;
                             `;
 
-                            // Hide other content
-                            document.body.style.overflow = 'hidden';
-                            const mainContent = document.querySelector('.main-content');
-                            const bottomNav = document.querySelector('.bottom-nav');
-                            const header = document.querySelector('.header');
+                            // Блокируем ориентацию в ландшафтном режиме для видео
+                            try {
+                                console.log('Attempting to lock landscape orientation...');
 
-                            if (mainContent) mainContent.style.display = 'none';
-                            if (bottomNav) bottomNav.style.display = 'none';
-                            if (header) header.style.display = 'none';
-
-                            // Try to lock orientation to landscape
-                            if (window.Telegram && window.Telegram.WebApp) {
-                                try {
-                                    if (window.Telegram.WebApp.lockOrientation) {
-                                        window.Telegram.WebApp.lockOrientation('landscape');
+                                // 1. Telegram API для блокировки ориентации
+                                if (window.Telegram?.WebApp) {
+                                    // Новый метод Telegram v8.0+
+                                    if (window.Telegram.WebApp.toggleOrientationLock) {
+                                        console.log('Using Telegram toggleOrientationLock');
+                                        window.Telegram.WebApp.toggleOrientationLock(true);
                                     }
-                                } catch (e) {
-                                    console.log('Could not lock orientation:', e);
+
+                                    // Прямой вызов postEvent для старых версий
+                                    try {
+                                        if (window.TelegramWebviewProxy?.postEvent) {
+                                            console.log('Using TelegramWebviewProxy.postEvent for landscape');
+                                            window.TelegramWebviewProxy.postEvent('web_app_toggle_orientation_lock', JSON.stringify({locked: true}));
+                                        } else if (window.parent) {
+                                            console.log('Using window.parent.postMessage for landscape');
+                                            const data = JSON.stringify({
+                                                eventType: 'web_app_toggle_orientation_lock',
+                                                eventData: { locked: true }
+                                            });
+                                            window.parent.postMessage(data, 'https://web.telegram.org');
+                                        }
+                                    } catch (e) {
+                                        console.log('Telegram API fallback failed:', e);
+                                    }
                                 }
+
+                                // 2. Стандартный Screen Orientation API
+                                if (screen.orientation && screen.orientation.lock) {
+                                    console.log('Using screen.orientation.lock');
+                                    screen.orientation.lock('landscape-primary').catch(err => {
+                                        console.log('Primary landscape failed, trying any landscape');
+                                        screen.orientation.lock('landscape').catch(err2 => {
+                                            console.log('All orientation locks failed:', err2);
+                                        });
+                                    });
+                                }
+
+                                // 3. Принудительный CSS поворот для всех устройств в портретном режиме
+                                if (window.innerHeight > window.innerWidth) {
+                                    console.log('Applying CSS rotation for portrait mode');
+                                    frames[i].style.cssText += `
+                                        transform: rotate(90deg) !important;
+                                        transform-origin: center center !important;
+                                        width: 100vh !important;
+                                        height: 100vw !important;
+                                        position: fixed !important;
+                                        top: 50% !important;
+                                        left: 50% !important;
+                                        margin-left: -50vh !important;
+                                        margin-top: -50vw !important;
+                                    `;
+                                }
+
+                                // 4. Дополнительно для Android - попробуем webkit
+                                if (navigator.userAgent.includes('Android')) {
+                                    console.log('Android detected, applying additional styles');
+                                    document.body.style.overflow = 'hidden';
+                                    document.documentElement.style.overflow = 'hidden';
+                                }
+
+                            } catch (error) {
+                                console.log('Failed to lock orientation:', error);
                             }
-
                         } else {
-                            // Exiting fullscreen
+                            // Выходим из полноэкранного режима
                             console.log('Exiting fullscreen mode');
+                            window.oldFrameStyles ? frames[i].style.cssText = window.oldFrameStyles : frames[i].style.cssText = '';
 
-                            // Reset iframe style
-                            iframe.style.cssText = 'position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none;';
+                            // Разблокируем ориентацию
+                            try {
+                                console.log('Unlocking orientation...');
 
-                            // Show content again
-                            document.body.style.overflow = '';
-                            const mainContent = document.querySelector('.main-content');
-                            const bottomNav = document.querySelector('.bottom-nav');
-                            const header = document.querySelector('.header');
-
-                            if (mainContent) mainContent.style.display = '';
-                            if (bottomNav) bottomNav.style.display = '';
-                            if (header) header.style.display = '';
-
-                            // Unlock orientation
-                            if (window.Telegram && window.Telegram.WebApp) {
-                                try {
-                                    if (window.Telegram.WebApp.unlockOrientation) {
-                                        window.Telegram.WebApp.unlockOrientation();
+                                // Разблокируем через Telegram API
+                                if (window.Telegram?.WebApp) {
+                                    if (window.Telegram.WebApp.toggleOrientationLock) {
+                                        console.log('Unlocking via Telegram API');
+                                        window.Telegram.WebApp.toggleOrientationLock(false);
                                     }
-                                } catch (e) {
-                                    console.log('Could not unlock orientation:', e);
+
+                                    // Прямой вызов для разблокировки
+                                    try {
+                                        if (window.TelegramWebviewProxy?.postEvent) {
+                                            window.TelegramWebviewProxy.postEvent('web_app_toggle_orientation_lock', JSON.stringify({locked: false}));
+                                        } else if (window.parent) {
+                                            const data = JSON.stringify({
+                                                eventType: 'web_app_toggle_orientation_lock',
+                                                eventData: { locked: false }
+                                            });
+                                            window.parent.postMessage(data, 'https://web.telegram.org');
+                                        }
+                                    } catch (e) {
+                                        console.log('Telegram unlock fallback failed:', e);
+                                    }
                                 }
+
+                                // Стандартный способ разблокировки
+                                if (screen.orientation && screen.orientation.unlock) {
+                                    console.log('Unlocking via screen.orientation');
+                                    screen.orientation.unlock();
+                                }
+
+                                // Восстанавливаем стили для Android
+                                if (navigator.userAgent.includes('Android')) {
+                                    document.body.style.overflow = '';
+                                    document.documentElement.style.overflow = '';
+                                }
+
+                            } catch (error) {
+                                console.log('Failed to unlock orientation:', error);
                             }
                         }
+                        break;
                     }
                 }
-            });
-
-            // Fallback: Make iframe container clickable to trigger native fullscreen
-            iframe.addEventListener('click', function(e) {
-                console.log('Iframe clicked');
-            });
-        });
+            }
+        };
     </script>
     <script src="module.js"></script>
 </body>
